@@ -489,6 +489,39 @@
         .export-btn {
             background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
             width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .import-btn {
+            background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .lock-btn {
+            background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+            width: 100%;
+        }
+
+        .security-status {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .security-status.locked {
+            border-color: #43a047;
+            background: #e8f5e9;
+        }
+
+        .security-status.unlocked {
+            border-color: #ff6f00;
+            background: #fff3e0;
         }
 
         .modal-overlay {
@@ -540,6 +573,56 @@
         .item-title-row {
             display: flex;
             align-items: center;
+        }
+
+        .password-input-group {
+            position: relative;
+        }
+
+        .password-input-group input {
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
         }
 
         .map-container {
@@ -684,6 +767,64 @@
             </div>
         </div>
 
+        <!-- 設定密碼 Modal -->
+        <div class="modal-overlay" id="passwordModal">
+            <div class="modal">
+                <div class="modal-header-edit">
+                    <h2>🔐 設定密碼保護</h2>
+                    <button class="icon-btn" onclick="closePasswordModal()" style="font-size: 1.5em;">✕</button>
+                </div>
+                <div class="add-form">
+                    <p style="margin-bottom: 15px; color: #666;">
+                        設定密碼後，您的行程資料將會加密儲存在本地瀏覽器中，確保隱私安全。
+                    </p>
+                    
+                    <div class="form-group">
+                        <label>新密碼</label>
+                        <div class="password-input-group">
+                            <input type="password" id="newPassword" placeholder="請輸入至少 6 位數的密碼">
+                            <button class="toggle-password" onclick="togglePasswordVisibility('newPassword')">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>確認密碼</label>
+                        <div class="password-input-group">
+                            <input type="password" id="confirmPassword" placeholder="再次輸入密碼">
+                            <button class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">👁️</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-full" onclick="setPassword()">🔒 啟用密碼保護</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 解鎖 Modal -->
+        <div class="modal-overlay" id="unlockModal">
+            <div class="modal">
+                <div class="modal-header-edit">
+                    <h2>🔓 輸入密碼</h2>
+                </div>
+                <div class="add-form">
+                    <p style="margin-bottom: 15px; color: #666;">
+                        請輸入密碼以存取您的行程資料
+                    </p>
+                    
+                    <div class="form-group">
+                        <label>密碼</label>
+                        <div class="password-input-group">
+                            <input type="password" id="unlockPassword" placeholder="輸入密碼">
+                            <button class="toggle-password" onclick="togglePasswordVisibility('unlockPassword')">👁️</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-full" onclick="unlockData()">🔓 解鎖</button>
+                    <button class="btn btn-full" style="background: #999; margin-top: 10px;" onclick="resetAllData()">🗑️ 忘記密碼？清除所有資料</button>
+                </div>
+            </div>
+        </div>
+
         <div class="main-content">
             <!-- 左側面板：新增行程 -->
             <div class="left-panel">
@@ -749,7 +890,23 @@
                 </div>
 
                 <div class="export-section">
+                    <div class="security-status" id="securityStatus">
+                        <span style="font-size: 1.5em;">🔓</span>
+                        <div style="flex: 1;">
+                            <strong>資料未加密</strong>
+                            <div style="font-size: 0.85em; opacity: 0.7;">建議設定密碼保護</div>
+                        </div>
+                    </div>
+                    
                     <button class="btn export-btn" onclick="exportToPDF()">📄 匯出 PDF 行程表</button>
+                    <button class="btn export-btn" onclick="exportToJSON()">💾 匯出加密備份檔</button>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" id="importFile" accept=".json" onchange="importFromJSON(event)">
+                        <label for="importFile" class="file-input-label">📂 匯入備份檔</label>
+                    </div>
+                    
+                    <button class="btn lock-btn" onclick="openPasswordModal()" id="passwordBtn">🔐 設定密碼保護</button>
                 </div>
             </div>
 
@@ -808,6 +965,8 @@
         let calendarView = 'month'; // 'month' or 'week'
         let draggedElement = null;
         let draggedEventId = null;
+        let isLocked = false;
+        let currentPassword = null;
 
         const typeIcons = {
             attraction: '🏛️',
@@ -820,10 +979,110 @@
 
         const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
+        // 加密函數（使用 AES）
+        async function encryptData(data, password) {
+            const encoder = new TextEncoder();
+            const dataBuffer = encoder.encode(JSON.stringify(data));
+            const passwordBuffer = encoder.encode(password);
+            
+            // 使用密碼生成密鑰
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw',
+                passwordBuffer,
+                { name: 'PBKDF2' },
+                false,
+                ['deriveBits', 'deriveKey']
+            );
+            
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            
+            const key = await crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt']
+            );
+            
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const encryptedData = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: iv },
+                key,
+                dataBuffer
+            );
+            
+            // 組合 salt + iv + 加密資料
+            const result = new Uint8Array(salt.length + iv.length + encryptedData.byteLength);
+            result.set(salt, 0);
+            result.set(iv, salt.length);
+            result.set(new Uint8Array(encryptedData), salt.length + iv.length);
+            
+            return btoa(String.fromCharCode(...result));
+        }
+
+        // 解密函數
+        async function decryptData(encryptedString, password) {
+            try {
+                const encryptedBytes = Uint8Array.from(atob(encryptedString), c => c.charCodeAt(0));
+                
+                const salt = encryptedBytes.slice(0, 16);
+                const iv = encryptedBytes.slice(16, 28);
+                const data = encryptedBytes.slice(28);
+                
+                const encoder = new TextEncoder();
+                const passwordBuffer = encoder.encode(password);
+                
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    passwordBuffer,
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveBits', 'deriveKey']
+                );
+                
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: salt,
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    keyMaterial,
+                    { name: 'AES-GCM', length: 256 },
+                    false,
+                    ['decrypt']
+                );
+                
+                const decryptedData = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    data
+                );
+                
+                const decoder = new TextDecoder();
+                return JSON.parse(decoder.decode(decryptedData));
+            } catch (e) {
+                throw new Error('密碼錯誤或資料損壞');
+            }
+        }
+
         // 載入儲存的資料
         function loadEvents() {
             const saved = localStorage.getItem('travelEvents');
-            if (saved) {
+            const passwordHash = localStorage.getItem('travelPasswordHash');
+            
+            if (passwordHash) {
+                // 資料已加密，需要密碼解鎖
+                isLocked = true;
+                updateSecurityStatus();
+                document.getElementById('unlockModal').classList.add('active');
+            } else if (saved) {
+                // 資料未加密
                 events = JSON.parse(saved);
                 renderEvents();
                 renderCalendar();
@@ -831,8 +1090,220 @@
         }
 
         // 儲存資料
-        function saveEvents() {
-            localStorage.setItem('travelEvents', JSON.stringify(events));
+        async function saveEvents() {
+            if (currentPassword) {
+                // 加密儲存
+                const encrypted = await encryptData(events, currentPassword);
+                localStorage.setItem('travelEvents', encrypted);
+            } else {
+                // 明文儲存
+                localStorage.setItem('travelEvents', JSON.stringify(events));
+            }
+        }
+
+        // 更新安全狀態顯示
+        function updateSecurityStatus() {
+            const statusDiv = document.getElementById('securityStatus');
+            const passwordBtn = document.getElementById('passwordBtn');
+            
+            if (currentPassword) {
+                statusDiv.className = 'security-status locked';
+                statusDiv.innerHTML = `
+                    <span style="font-size: 1.5em;">🔒</span>
+                    <div style="flex: 1;">
+                        <strong>資料已加密</strong>
+                        <div style="font-size: 0.85em; opacity: 0.7;">您的行程受密碼保護</div>
+                    </div>
+                `;
+                passwordBtn.textContent = '🔓 移除密碼保護';
+                passwordBtn.onclick = removePassword;
+            } else {
+                statusDiv.className = 'security-status unlocked';
+                statusDiv.innerHTML = `
+                    <span style="font-size: 1.5em;">🔓</span>
+                    <div style="flex: 1;">
+                        <strong>資料未加密</strong>
+                        <div style="font-size: 0.85em; opacity: 0.7;">建議設定密碼保護</div>
+                    </div>
+                `;
+                passwordBtn.textContent = '🔐 設定密碼保護';
+                passwordBtn.onclick = openPasswordModal;
+            }
+        }
+
+        // 開啟密碼設定視窗
+        function openPasswordModal() {
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        // 關閉密碼設定視窗
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        // 設定密碼
+        async function setPassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!newPassword || newPassword.length < 6) {
+                alert('密碼至少需要 6 個字元！');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('兩次輸入的密碼不一致！');
+                return;
+            }
+
+            currentPassword = newPassword;
+            
+            // 儲存密碼雜湊（用於驗證）
+            const passwordHash = await crypto.subtle.digest(
+                'SHA-256',
+                new TextEncoder().encode(newPassword)
+            );
+            localStorage.setItem('travelPasswordHash', btoa(String.fromCharCode(...new Uint8Array(passwordHash))));
+
+            // 重新加密儲存資料
+            await saveEvents();
+            
+            updateSecurityStatus();
+            closePasswordModal();
+            alert('密碼保護已啟用！請妥善保管您的密碼。');
+        }
+
+        // 解鎖資料
+        async function unlockData() {
+            const password = document.getElementById('unlockPassword').value;
+            
+            if (!password) {
+                alert('請輸入密碼！');
+                return;
+            }
+
+            try {
+                const encrypted = localStorage.getItem('travelEvents');
+                const decrypted = await decryptData(encrypted, password);
+                
+                events = decrypted;
+                currentPassword = password;
+                isLocked = false;
+                
+                document.getElementById('unlockModal').classList.remove('active');
+                document.getElementById('unlockPassword').value = '';
+                
+                renderEvents();
+                renderCalendar();
+                updateSecurityStatus();
+            } catch (e) {
+                alert('密碼錯誤！請重試。');
+            }
+        }
+
+        // 移除密碼保護
+        function removePassword() {
+            if (confirm('確定要移除密碼保護嗎？資料將以未加密方式儲存。')) {
+                currentPassword = null;
+                localStorage.removeItem('travelPasswordHash');
+                saveEvents();
+                updateSecurityStatus();
+                alert('密碼保護已移除');
+            }
+        }
+
+        // 重置所有資料
+        function resetAllData() {
+            if (confirm('警告：這將刪除所有資料且無法復原！確定要繼續嗎？')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // 切換密碼顯示
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // 匯出為加密 JSON
+        async function exportToJSON() {
+            if (events.length === 0) {
+                alert('目前沒有任何行程可以匯出！');
+                return;
+            }
+
+            const password = prompt('請設定備份檔密碼（至少 6 位）：');
+            
+            if (!password || password.length < 6) {
+                alert('密碼至少需要 6 個字元！');
+                return;
+            }
+
+            const confirmPwd = prompt('請再次輸入密碼確認：');
+            
+            if (password !== confirmPwd) {
+                alert('兩次輸入的密碼不一致！');
+                return;
+            }
+
+            const encrypted = await encryptData(events, password);
+            
+            const dataStr = JSON.stringify({
+                version: '1.0',
+                encrypted: true,
+                data: encrypted,
+                exportDate: new Date().toISOString()
+            }, null, 2);
+
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Travel_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('加密備份檔已匯出！請妥善保管密碼。');
+        }
+
+        // 從 JSON 匯入
+        async function importFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    
+                    if (!imported.encrypted) {
+                        alert('不支援的檔案格式！');
+                        return;
+                    }
+
+                    const password = prompt('請輸入備份檔密碼：');
+                    if (!password) return;
+
+                    const decrypted = await decryptData(imported.data, password);
+                    
+                    if (confirm(`確定要匯入 ${decrypted.length} 個行程嗎？這將覆蓋現有資料。`)) {
+                        events = decrypted;
+                        await saveEvents();
+                        renderEvents();
+                        renderCalendar();
+                        alert('資料已成功匯入！');
+                    }
+                } catch (error) {
+                    alert('匯入失敗：密碼錯誤或檔案損壞！');
+                }
+            };
+            reader.readAsText(file);
+            
+            // 清空 input
+            event.target.value = '';
         }
 
         // 新增行程
@@ -1451,6 +1922,7 @@
         document.getElementById('eventDate').valueAsDate = new Date();
         loadEvents();
         renderCalendar();
+        updateSecurityStatus();
     </script>
 </body>
 </html>
