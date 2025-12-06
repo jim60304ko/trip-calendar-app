@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行行程規劃</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .left-panel, .right-panel {
+            padding: 30px;
+        }
+
+        .left-panel {
+            border-right: 2px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-form {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .itinerary-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .itinerary-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .itinerary-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .item-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .item-time {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .item-location {
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .item-location:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .item-notes {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .calendar-view {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .view-toggle button {
+            background: transparent;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .view-toggle button:hover {
+            background: #f0f0f0;
+        }
+
+        .view-toggle button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .calendar-day.has-events {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ebff 100%);
+            border-color: #667eea;
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calendar-day.today {
+            border: 3px solid #ffa726;
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .day-events {
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+
+        .week-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .week-day-name {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .day-detail-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .day-detail-header h3 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        .close-detail-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .close-detail-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .day-event-card {
+            background: #f8f9ff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .day-event-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .event-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .event-card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-card-time {
+            background: white;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 2px solid #667eea;
+        }
+
+        .event-card-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .event-card-location:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .event-card-location:hover .location-icon {
+            transform: scale(1.2);
+        }
+
+        .location-icon {
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+
+        .event-card-notes {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            color: #666;
+            font-size: 0.95em;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .no-events-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .map-container {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-container p {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 2px solid #f0f0f0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                gap: 3px;
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✈️ 旅行行程規劃</h1>
+            <p>輕鬆管理你的旅行計畫，整合行程與地圖</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 左側面板：新增行程 -->
+            <div class="left-panel">
+                <div class="section-title">📝 新增行程</div>
+                
+                <div class="add-form">
+                    <div class="form-group">
+                        <label>行程名稱</label>
+                        <input type="text" id="eventTitle" placeholder="例如：參觀艾菲爾鐵塔">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>日期</label>
+                            <input type="date" id="eventDate">
+                        </div>
+                        <div class="form-group">
+                            <label>時間</label>
+                            <input type="time" id="eventTime">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>地點</label>
+                        <input type="text" id="eventLocation" placeholder="例如：艾菲爾鐵塔, 巴黎">
+                    </div>
+
+                    <div class="form-group">
+                        <label>類型</label>
+                        <select id="eventType">
+                            <option value="attraction">景點</option>
+                            <option value="food">美食</option>
+                            <option value="hotel">住宿</option>
+                            <option value="transport">交通</option>
+                            <option value="shopping">購物</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>備註</label>
+                        <textarea id="eventNotes" placeholder="任何想記錄的事項..."></textarea>
+                    </div>
+
+                    <button class="btn btn-full" onclick="addEvent()">➕ 新增行程</button>
+                </div>
+
+                <div class="section-title">📋 行程列表</div>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" onclick="filterEvents('all')">全部</button>
+                    <button class="filter-btn" onclick="filterEvents('attraction')">景點</button>
+                    <button class="filter-btn" onclick="filterEvents('food')">美食</button>
+                    <button class="filter-btn" onclick="filterEvents('hotel')">住宿</button>
+                    <button class="filter-btn" onclick="filterEvents('transport')">交通</button>
+                </div>
+
+                <div class="itinerary-list" id="itineraryList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>還沒有任何行程，開始新增吧！</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側面板：行事曆與地圖 -->
+            <div class="right-panel">
+                <div class="section-title">📅 行事曆</div>
+                
+                <div class="calendar-view">
+                    <div class="calendar-header">
+                        <div class="view-toggle">
+                            <button class="active" onclick="setCalendarView('month')">月</button>
+                            <button onclick="setCalendarView('week')">週</button>
+                        </div>
+                        <h3 id="calendarMonth"></h3>
+                        <div class="calendar-nav">
+                            <button onclick="previousPeriod()">◀ 上一個</button>
+                            <button onclick="today()">今天</button>
+                            <button onclick="nextPeriod()">下一個 ▶</button>
+                        </div>
+                    </div>
+                    <div class="week-header" id="weekHeader" style="display: none;">
+                        <div class="week-day-name">日</div>
+                        <div class="week-day-name">一</div>
+                        <div class="week-day-name">二</div>
+                        <div class="week-day-name">三</div>
+                        <div class="week-day-name">四</div>
+                        <div class="week-day-name">五</div>
+                        <div class="week-day-name">六</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+
+                <div class="section-title" id="dayDetailTitle">🗺️ 地圖預覽</div>
+                
+                <div id="dayDetailContainer">
+                    <div class="map-container" id="defaultMapView">
+                        <div style="font-size: 3em;">🗺️</div>
+                        <p>點擊行程中的地點，將自動開啟 Google Maps</p>
+                        <p style="font-size: 0.85em; margin-top: 5px; opacity: 0.7;">
+                            地圖整合功能可直接導航到目的地
+                        </p>
+                    </div>
+                    <div id="dayEventsDetail" style="display: none;">
+                        <div id="dayEventsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let events = [];
+        let currentFilter = 'all';
+        let currentDate = new Date();
+        let selectedDate = null;
+        let calendarView = 'month'; // 'month' or 'week'
+
+        const typeIcons = {
+            attraction: '🏛️',
+            food: '🍽️',
+            hotel: '🏨',
+            transport: '🚗',
+            shopping: '🛍️',
+            other: '📌'
+        };
+
+        const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+
+        // 載入儲存的資料
+        function loadEvents() {
+            const saved = localStorage.getItem('travelEvents');
+            if (saved) {
+                events = JSON.parse(saved);
+                renderEvents();
+                renderCalendar();
+            }
+        }
+
+        // 儲存資料
+        function saveEvents() {
+            localStorage.setItem('travelEvents', JSON.stringify(events));
+        }
+
+        // 新增行程
+        function addEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            const date = document.getElementById('eventDate').value;
+            const time = document.getElementById('eventTime').value;
+            const location = document.getElementById('eventLocation').value.trim();
+            const type = document.getElementById('eventType').value;
+            const notes = document.getElementById('eventNotes').value.trim();
+
+            if (!title || !date || !location) {
+                alert('請填寫行程名稱、日期和地點！');
+                return;
+            }
+
+            const event = {
+                id: Date.now(),
+                title,
+                date,
+                time,
+                location,
+                type,
+                notes
+            };
+
+            events.push(event);
+            events.sort((a, b) => {
+                const dateA = new Date(a.date + ' ' + (a.time || '00:00'));
+                const dateB = new Date(b.date + ' ' + (b.time || '00:00'));
+                return dateA - dateB;
+            });
+
+            saveEvents();
+            renderEvents();
+            renderCalendar();
+            clearForm();
+        }
+
+        // 清空表單
+        function clearForm() {
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventTime').value = '';
+            document.getElementById('eventLocation').value = '';
+            document.getElementById('eventNotes').value = '';
+            document.getElementById('eventType').value = 'attraction';
+        }
+
+        // 刪除行程
+        function deleteEvent(id) {
+            if (confirm('確定要刪除這個行程嗎？')) {
+                events = events.filter(e => e.id !== id);
+                saveEvents();
+                renderEvents();
+                renderCalendar();
+            }
+        }
+
+        // 開啟 Google Maps
+        function openMap(location) {
+            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+            window.open(url, '_blank');
+        }
+
+        // 渲染行程列表
+        function renderEvents() {
+            const container = document.getElementById('itineraryList');
+            const filtered = currentFilter === 'all' 
+                ? events 
+                : events.filter(e => e.type === currentFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>沒有符合條件的行程</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(event => `
+                <div class="itinerary-item">
+                    <div class="item-header">
+                        <div class="item-title">
+                            ${typeIcons[event.type]} ${event.title}
+                        </div>
+                        <div class="item-actions">
+                            <button class="icon-btn" onclick="deleteEvent(${event.id})" title="刪除">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="item-time">
+                        🕐 ${event.date} ${event.time ? event.time : ''}
+                    </div>
+                    <div class="item-location" onclick="openMap('${event.location}')">
+                        📍 ${event.location} (點擊開啟地圖)
+                    </div>
+                    ${event.notes ? `<div class="item-notes">💭 ${event.notes}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 篩選行程
+        function filterEvents(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderEvents();
+        }
+
+        // 渲染行事曆
+        function renderCalendar() {
+            if (calendarView === 'month') {
+                renderMonthView();
+            } else {
+                renderWeekView();
+            }
+        }
+
+        // 渲染月視圖
+        function renderMonthView() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('calendarMonth').textContent = 
+                `${year}年 ${month + 1}月`;
+            document.getElementById('weekHeader').style.display = 'none';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+
+            // 空白天數
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += '<div></div>';
+            }
+
+            // 日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = events.filter(e => e.date === dateStr);
+                const hasEvents = dayEvents.length > 0;
+                const isSelected = selectedDate === dateStr;
+                const isToday = dateStr === todayStr;
+
+                grid.innerHTML += `
+                    <div class="calendar-day ${hasEvents ? 'has-events' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}" 
+                         onclick="selectDate('${dateStr}')">
+                        <div class="day-number">${day}</div>
+                        ${hasEvents ? `<div class="day-events">${dayEvents.length} 個行程</div>` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染週視圖
+        function renderWeekView() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const date = currentDate.getDate();
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            // 計算這週的開始日期（週日）
+            const currentDay = new Date(year, month, date);
+            const dayOfWeek = currentDay.getDay();
+            const weekStart = new Date(currentDay);
+            weekStart.setDate(date - dayOfWeek);
+
+            // 顯示週標題
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            document.getElementById('calendarMonth').textContent = 
+                `${weekStart.getMonth() + 1}/${weekStart.getDate()} - ${weekEnd.getMonth() + 1}/${weekEnd.getDate()}, ${year}`;
+            document.getElementById('weekHeader').style.display = 'grid';
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+
+            // 顯示這週的7天
+            for (let i = 0; i < 7; i++) {
+                const currentDayDate = new Date(weekStart);
+                currentDayDate.setDate(weekStart.getDate() + i);
+                
+                const dateStr = `${currentDayDate.getFullYear()}-${String(currentDayDate.getMonth() + 1).padStart(2, '0')}-${String(currentDayDate.getDate()).padStart(2, '0')}`;
+                const dayEvents = events.filter(e => e.date === dateStr);
+                const hasEvents = dayEvents.length > 0;
+                const isSelected = selectedDate === dateStr;
+                const isToday = dateStr === todayStr;
+                const isOtherMonth = currentDayDate.getMonth() !== currentDate.getMonth();
+
+                grid.innerHTML += `
+                    <div class="calendar-day ${hasEvents ? 'has-events' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${isOtherMonth ? 'other-month' : ''}" 
+                         onclick="selectDate('${dateStr}')">
+                        <div class="day-number">${currentDayDate.getDate()}</div>
+                        ${hasEvents ? `<div class="day-events">${dayEvents.length} 個</div>` : ''}
+                        ${dayEvents.length > 0 ? `<div style="font-size: 0.7em; margin-top: 5px;">${dayEvents.slice(0, 2).map(e => typeIcons[e.type]).join(' ')}</div>` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // 切換視圖
+        function setCalendarView(view) {
+            calendarView = view;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.view-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderCalendar();
+        }
+
+        // 選擇日期
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            renderCalendar();
+            showDayDetail(dateStr);
+        }
+
+        // 顯示當日詳細行程
+        function showDayDetail(dateStr) {
+            const dayEvents = events.filter(e => e.date === dateStr);
+            const detailContainer = document.getElementById('dayEventsDetail');
+            const defaultView = document.getElementById('defaultMapView');
+            const title = document.getElementById('dayDetailTitle');
+            
+            if (dayEvents.length === 0) {
+                detailContainer.style.display = 'none';
+                defaultView.style.display = 'flex';
+                title.textContent = '🗺️ 地圖預覽';
+                return;
+            }
+
+            // 隱藏預設視圖，顯示詳細行程
+            defaultView.style.display = 'none';
+            detailContainer.style.display = 'block';
+
+            // 格式化日期顯示
+            const dateObj = new Date(dateStr);
+            const weekDay = weekDays[dateObj.getDay()];
+            const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日 (${weekDay})`;
+            
+            title.textContent = `📅 ${formattedDate}`;
+
+            // 渲染行程卡片
+            const eventsList = document.getElementById('dayEventsList');
+            eventsList.innerHTML = `
+                <div class="day-detail-header">
+                    <h3>共 ${dayEvents.length} 個行程</h3>
+                    <button class="close-detail-btn" onclick="closeDayDetail()">✕ 關閉</button>
+                </div>
+                ${dayEvents.map(event => `
+                    <div class="day-event-card">
+                        <div class="event-card-header">
+                            <div class="event-card-title">
+                                <span style="font-size: 1.3em;">${typeIcons[event.type]}</span>
+                                <span>${event.title}</span>
+                            </div>
+                            <div class="event-card-time">
+                                ${event.time ? event.time : '未設定時間'}
+                            </div>
+                        </div>
+                        <div class="event-card-location" onclick="openMap('${event.location}')">
+                            <span class="location-icon">📍</span>
+                            <span style="flex: 1;">${event.location}</span>
+                            <span style="font-size: 0.9em; opacity: 0.7;">點擊開啟地圖 →</span>
+                        </div>
+                        ${event.notes ? `
+                            <div class="event-card-notes">
+                                <strong>💭 備註：</strong><br>
+                                ${event.notes}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // 關閉當日詳細行程
+        function closeDayDetail() {
+            selectedDate = null;
+            document.getElementById('dayEventsDetail').style.display = 'none';
+            document.getElementById('defaultMapView').style.display = 'flex';
+            document.getElementById('dayDetailTitle').textContent = '🗺️ 地圖預覽';
+            renderCalendar();
+        }
+
+        // 上一個時期（月或週）
+        function previousPeriod() {
+            if (calendarView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else {
+                currentDate.setDate(currentDate.getDate() - 7);
+            }
+            renderCalendar();
+        }
+
+        // 下一個時期（月或週）
+        function nextPeriod() {
+            if (calendarView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else {
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+            renderCalendar();
+        }
+
+        // 回到今天
+        function today() {
+            currentDate = new Date();
+            selectedDate = null;
+            renderCalendar();
+        }
+
+        // 上一個月（保留向後相容）
+        function previousMonth() {
+            previousPeriod();
+        }
+
+        // 下一個月（保留向後相容）
+        function nextMonth() {
+            nextPeriod();
+        }
+
+        // 初始化
+        document.getElementById('eventDate').valueAsDate = new Date();
+        loadEvents();
+        renderCalendar();
+    </script>
+</body>
+</html>
